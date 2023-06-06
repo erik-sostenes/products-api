@@ -11,12 +11,17 @@ import (
 func NewInjector() error {
 	engine := echo.New()
 
-	productCommandHandler := services.NewCreateProductCommandHandler(db.NewMockProductStorer())
+	mock := db.NewMockProductStorer()
+	productCommandHandler := services.NewCreateProductCommandHandler(mock)
 
 	cmdBus := make(command.CommandBus[services.ProductCommand])
 	if err := cmdBus.Record(services.ProductCommand{}, &productCommandHandler); err != nil {
 		return err
 	}
 
-	return NewServer(engine, cmdBus).Start()
+	productsFinder := services.FinderProducts{
+		ProductStorer: mock,
+	}
+
+	return NewServer(engine, cmdBus, productsFinder).Start()
 }

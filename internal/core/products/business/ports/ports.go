@@ -11,5 +11,7 @@ type (
 	ProductStorer interface {
 		// Save method that persists a product in the database
 		Save(context.Context, string, domain.Product) error
+		// Find method that searches for all the products in the database
+		Find(context.Context) ([]domain.Product, error)
 	}
 )

@@ -20,3 +20,10 @@ func NewProductStorer() ports.ProductStorer {
 func (p ProductStorer) Save(ctx context.Context, identifier string, product domain.Product) error {
 	return nil
 }
+
+// Find method searches for all the records in postgresql and returns them in a slice
+func (p ProductStorer) Find(ctx context.Context) ([]domain.Product, error) {
+	var products []domain.Product
+
+	return products, nil
+}

@@ -1,7 +1,6 @@
 package drives
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/erik-sostenes/products-api/internal/core/products/business/services"
@@ -30,7 +29,6 @@ type ProductRequest struct {
 
 // CreateProduct represents an http handler, it is in charge of validating the http response and sending the data to the core business
 func CreateProduct(bus command.CommandBus[services.ProductCommand]) echo.HandlerFunc {
-	fmt.Println("Hola")
 	return func(c echo.Context) error {
 		var request ProductRequest
 

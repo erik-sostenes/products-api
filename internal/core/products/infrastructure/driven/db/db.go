@@ -21,7 +21,7 @@ func NewMockProductStorer() ports.ProductStorer {
 	}
 }
 
-// Save saves a resource in a map if the resource already exist, returns a StatusBadRequest type error
+// Save method that saves a resource in a map if the resource already exist, returns a StatusBadRequest type error
 func (m mockProductStorer) Save(_ context.Context, identifier string, product domain.Product) error {
 	_, ok := m.cache[identifier]
 	if ok {
@@ -31,4 +31,15 @@ func (m mockProductStorer) Save(_ context.Context, identifier string, product do
 	m.cache[identifier] = product
 
 	return nil
+}
+
+// Find method searches for all the records in the map and returns them in a slice
+func (m mockProductStorer) Find(_ context.Context) ([]domain.Product, error) {
+	var products []domain.Product
+
+	for _, v := range m.cache {
+		products = append(products, v)
+	}
+
+	return products, nil
 }
