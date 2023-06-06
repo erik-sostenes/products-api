@@ -1,0 +1,13 @@
+# Jetbrains IDEs
+.idea
+
+# Vim
+*.swp
+*.swn
+*.swo
+
+# Test binary, built with `go test -c`
+*.test
+
+# code
+.code
