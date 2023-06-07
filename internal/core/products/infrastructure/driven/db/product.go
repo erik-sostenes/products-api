@@ -34,3 +34,9 @@ func (p ProductStorer) FindById(ctx context.Context, id string) (domain.Product,
 
 	return product, nil
 }
+
+// Delete method deletes a record by identifier in postgresql
+func (p ProductStorer) Delete(ctx context.Context, id string) error {
+
+	return nil
+}

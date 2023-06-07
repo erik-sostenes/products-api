@@ -44,7 +44,7 @@ func (m mockProductStorer) Find(_ context.Context) ([]domain.Product, error) {
 	return products, nil
 }
 
-// The FindById method searches for an entire map record and returns them
+// FindById method searches for an entire map record and returns them
 func (m mockProductStorer) FindById(_ context.Context, identifier string) (domain.Product, error) {
 	product, ok := m.cache[identifier]
 	if !ok {
@@ -52,4 +52,16 @@ func (m mockProductStorer) FindById(_ context.Context, identifier string) (domai
 	}
 
 	return product, nil
+}
+
+// Delete method deletes a record from the map
+func (m mockProductStorer) Delete(_ context.Context, identifier string) error {
+	_, ok := m.cache[identifier]
+
+	if !ok {
+		return wrongs.StatusNotFound(fmt.Sprintf("Resource with identifier %v does no exist.", identifier))
+	}
+
+	delete(m.cache, identifier)
+	return nil
 }

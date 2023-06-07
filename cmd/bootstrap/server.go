@@ -18,17 +18,19 @@ const defaultPort = "8080"
 
 // Server contains the configuration of server to start and register all http handler
 type Server struct {
-	port   string
-	engine *echo.Echo
-	command.CommandBus[services.ProductCommand]
-	FinderProductsQueryBus query.QueryBus[services.FindProductsQuery, []services.ProductResponse]
-	FinderProductQueryBus  query.QueryBus[services.FindProductQuery, services.ProductResponse]
+	port                   string
+	engine                 *echo.Echo
+	createProductCmdBus    command.CommandBus[services.ProductCommand]
+	deleteProductCmdBus    command.CommandBus[services.DeleteProductCommand]
+	finderProductsQueryBus query.QueryBus[services.FindProductsQuery, []services.ProductResponse]
+	finderProductQueryBus  query.QueryBus[services.FindProductQuery, services.ProductResponse]
 }
 
 // NewServer returns an instance of Server
 func NewServer(
 	engine *echo.Echo,
-	cmdBus command.CommandBus[services.ProductCommand],
+	createProductCmdBus command.CommandBus[services.ProductCommand],
+	deleteProductCmdBus command.CommandBus[services.DeleteProductCommand],
 	finderProductsQueryBus query.QueryBus[services.FindProductsQuery, []services.ProductResponse],
 	finderProductQueryBus query.QueryBus[services.FindProductQuery, services.ProductResponse],
 ) *Server {
@@ -40,9 +42,10 @@ func NewServer(
 	return &Server{
 		port:                   port,
 		engine:                 engine,
-		CommandBus:             cmdBus,
-		FinderProductsQueryBus: finderProductsQueryBus,
-		FinderProductQueryBus:  finderProductQueryBus,
+		createProductCmdBus:    createProductCmdBus,
+		deleteProductCmdBus:    deleteProductCmdBus,
+		finderProductsQueryBus: finderProductsQueryBus,
+		finderProductQueryBus:  finderProductQueryBus,
 	}
 }
 
@@ -61,7 +64,8 @@ func (s *Server) setRoutes() {
 	group := s.engine.Group("/api/v1/products")
 
 	group.GET("/status", status.HealthCheck())
-	group.PUT("/create/:id", drives.CreateProduct(s.CommandBus))
-	group.GET("/get-all", drives.FindProducts(&s.FinderProductsQueryBus))
-	group.GET("/get/", drives.FindProduct(&s.FinderProductQueryBus))
+	group.PUT("/create/:id", drives.CreateProduct(s.createProductCmdBus))
+	group.GET("/get-all", drives.FindProducts(&s.finderProductsQueryBus))
+	group.GET("/get/", drives.FindProduct(&s.finderProductQueryBus))
+	group.DELETE("/delete/:id", drives.DeleteProduct(s.deleteProductCmdBus))
 }

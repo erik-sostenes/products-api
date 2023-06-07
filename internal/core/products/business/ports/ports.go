@@ -15,5 +15,7 @@ type (
 		Find(ctx context.Context) ([]domain.Product, error)
 		// FindById method searches for a product by its identifier in the database
 		FindById(ctx context.Context, identifier string) (domain.Product, error)
+		// Delete method deletes a product by it is identifier in the database
+		Delete(ctx context.Context, identifier string) error
 	}
 )

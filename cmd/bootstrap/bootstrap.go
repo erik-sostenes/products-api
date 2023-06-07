@@ -1,3 +1,4 @@
+// bootstrap package that builds the program with its full set of components
 package bootstrap
 
 import (
@@ -13,26 +14,30 @@ func NewInjector() error {
 	engine := echo.New()
 
 	mock := db.NewMockProductStorer()
-	productCommandHandler := services.NewCreateProductCommandHandler(mock)
 
-	cmdBus := make(command.CommandBus[services.ProductCommand])
-	if err := cmdBus.Record(services.ProductCommand{}, &productCommandHandler); err != nil {
+	productCommandHandler := services.NewCreateProductCommandHandler(mock)
+	createProductCmdBus := make(command.CommandBus[services.ProductCommand])
+	if err := createProductCmdBus.Record(services.ProductCommand{}, &productCommandHandler); err != nil {
+		return err
+	}
+
+	deleteProductCommandHandler := services.NewDeleteProductCommandHandler(mock)
+	deleteProductCmdBus := make(command.CommandBus[services.DeleteProductCommand])
+	if err := deleteProductCmdBus.Record(services.DeleteProductCommand{}, deleteProductCommandHandler); err != nil {
 		return err
 	}
 
 	finderProductsQueryHandler := services.NewFinderProductsQueryHandler(mock)
-
 	productsQueryBus := make(query.QueryBus[services.FindProductsQuery, []services.ProductResponse])
 	if err := productsQueryBus.Record(services.FindProductsQuery{}, finderProductsQueryHandler); err != nil {
 		return err
 	}
 
 	finderProductQueryHandler := services.NewFinderProductQueryHandler(mock)
-
 	productQueryBus := make(query.QueryBus[services.FindProductQuery, services.ProductResponse])
 	if err := productQueryBus.Record(services.FindProductQuery{}, finderProductQueryHandler); err != nil {
 		return err
 	}
 
-	return NewServer(engine, cmdBus, productsQueryBus, productQueryBus).Start()
+	return NewServer(engine, createProductCmdBus, deleteProductCmdBus, productsQueryBus, productQueryBus).Start()
 }
