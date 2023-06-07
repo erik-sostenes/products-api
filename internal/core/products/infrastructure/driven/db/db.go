@@ -43,3 +43,13 @@ func (m mockProductStorer) Find(_ context.Context) ([]domain.Product, error) {
 
 	return products, nil
 }
+
+// The FindById method searches for an entire map record and returns them
+func (m mockProductStorer) FindById(_ context.Context, identifier string) (domain.Product, error) {
+	product, ok := m.cache[identifier]
+	if !ok {
+		return domain.Product{}, wrongs.StatusNotFound(fmt.Sprintf("Resource with identifier %v does no exist.", identifier))
+	}
+
+	return product, nil
+}

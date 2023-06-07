@@ -9,9 +9,11 @@ import (
 type (
 	// ProductStorer represents the right side, for a adapter to persist data
 	ProductStorer interface {
-		// Save method that persists a product in the database
-		Save(context.Context, string, domain.Product) error
-		// Find method that searches for all the products in the database
-		Find(context.Context) ([]domain.Product, error)
+		// Save method persists a product in the database
+		Save(ctx context.Context, identifier string, product domain.Product) error
+		// Find method searches for all the products in the database
+		Find(ctx context.Context) ([]domain.Product, error)
+		// FindById method searches for a product by its identifier in the database
+		FindById(ctx context.Context, identifier string) (domain.Product, error)
 	}
 )

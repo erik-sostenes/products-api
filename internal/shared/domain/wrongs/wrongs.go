@@ -23,3 +23,11 @@ type StatusBadRequest string
 func (e StatusBadRequest) Error() string {
 	return string(e)
 }
+
+// StatusNotFound will return an error when a resource is not found
+type StatusNotFound string
+
+// StatusNotFound implements the Error interface
+func (e StatusNotFound) Error() string {
+	return string(e)
+}

@@ -27,3 +27,10 @@ func (p ProductStorer) Find(ctx context.Context) ([]domain.Product, error) {
 
 	return products, nil
 }
+
+// FindById method searches for a record by identifier in postgresql
+func (p ProductStorer) FindById(ctx context.Context, id string) (domain.Product, error) {
+	var product domain.Product
+
+	return product, nil
+}

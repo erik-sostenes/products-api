@@ -23,5 +23,9 @@ func NewInjector() error {
 		ProductStorer: mock,
 	}
 
-	return NewServer(engine, cmdBus, productsFinder).Start()
+	productFinder := services.FinderProduct{
+		ProductStorer: mock,
+	}
+
+	return NewServer(engine, cmdBus, productsFinder, productFinder).Start()
 }

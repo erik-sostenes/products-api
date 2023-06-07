@@ -21,10 +21,16 @@ type Server struct {
 	engine *echo.Echo
 	command.CommandBus[services.ProductCommand]
 	services.FinderProducts
+	services.FinderProduct
 }
 
 // NewServer returns an instance of Server
-func NewServer(engine *echo.Echo, cmdBus command.CommandBus[services.ProductCommand], services services.FinderProducts) *Server {
+func NewServer(
+	engine *echo.Echo,
+	cmdBus command.CommandBus[services.ProductCommand],
+	finderProducts services.FinderProducts,
+	finderProduct services.FinderProduct,
+) *Server {
 	port := os.Getenv("PORT")
 	if strings.TrimSpace(port) == "" {
 		port = defaultPort
@@ -34,7 +40,8 @@ func NewServer(engine *echo.Echo, cmdBus command.CommandBus[services.ProductComm
 		port:           port,
 		engine:         engine,
 		CommandBus:     cmdBus,
-		FinderProducts: services,
+		FinderProducts: finderProducts,
+		FinderProduct:  finderProduct,
 	}
 }
 
@@ -55,4 +62,5 @@ func (s *Server) setRoutes() {
 	group.GET("/status", status.HealthCheck())
 	group.PUT("/create/:id", drives.CreateProduct(s.CommandBus))
 	group.GET("/get-all", drives.FindProducts(s.FinderProducts))
+	group.GET("/get/", drives.FindProduct(s.FinderProduct))
 }
