@@ -5,8 +5,7 @@ import (
 	"strings"
 
 	"github.com/erik-sostenes/products-api/internal/core/products/business/services"
-	"github.com/erik-sostenes/products-api/internal/shared/domain"
-	"github.com/erik-sostenes/products-api/internal/shared/domain/wrongs"
+	"github.com/erik-sostenes/products-api/internal/shared/infrastructure/drives/handler"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,20 +15,15 @@ func FindProduct(services services.FinderProduct) echo.HandlerFunc {
 		id := c.QueryParam("id")
 
 		if strings.TrimSpace(id) == "" {
-			return echo.NewHTTPError(http.StatusBadRequest, domain.Map{"error": "Missing identifier."})
+			return echo.NewHTTPError(http.StatusBadRequest, echo.Map{"error": "Missing identifier."})
 		}
 
 		product, err := services.FindById(c.Request().Context(), id)
 
-		switch err.(type) {
-		case wrongs.StatusBadRequest:
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		case wrongs.StatusNotFound:
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
-		default:
-			echo.NewHTTPError(http.StatusInternalServerError, domain.Map{"error": "An error occurred in the http server."})
+		if err != nil {
+			return handler.Error(err)
 		}
 
-		return c.JSON(http.StatusOK, domain.Map{"data": product})
+		return c.JSON(http.StatusOK, echo.Map{"data": product})
 	}
 }

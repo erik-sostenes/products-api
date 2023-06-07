@@ -12,9 +12,9 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type HandlerFunc func() (echo.HandlerFunc, error)
-
 func TestProductHandler_Create(t *testing.T) {
+	type HandlerFunc func() (echo.HandlerFunc, error)
+
 	tsc := map[string]struct {
 		HandlerFunc
 		*http.Request

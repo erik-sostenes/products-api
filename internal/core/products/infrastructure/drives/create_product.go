@@ -4,9 +4,8 @@ import (
 	"net/http"
 
 	"github.com/erik-sostenes/products-api/internal/core/products/business/services"
-	"github.com/erik-sostenes/products-api/internal/shared/domain"
 	"github.com/erik-sostenes/products-api/internal/shared/domain/bus/command"
-	"github.com/erik-sostenes/products-api/internal/shared/domain/wrongs"
+	"github.com/erik-sostenes/products-api/internal/shared/infrastructure/drives/handler"
 	"github.com/labstack/echo/v4"
 )
 
@@ -33,7 +32,7 @@ func CreateProduct(bus command.CommandBus[services.ProductCommand]) echo.Handler
 		var request ProductRequest
 
 		if err := c.Bind(&request); err != nil {
-			return echo.NewHTTPError(http.StatusUnprocessableEntity, domain.Map{"error": "The product structure is incorrect."})
+			return echo.NewHTTPError(http.StatusUnprocessableEntity, echo.Map{"error": "The product structure is incorrect."})
 		}
 
 		cmd := services.ProductCommand{
@@ -51,13 +50,10 @@ func CreateProduct(bus command.CommandBus[services.ProductCommand]) echo.Handler
 		}
 
 		err := bus.Dispatch(c.Request().Context(), cmd)
-		switch err.(type) {
-		case wrongs.StatusBadRequest:
-			return echo.NewHTTPError(http.StatusBadRequest, domain.Map{"message": err.Error()})
-		default:
-			echo.NewHTTPError(http.StatusInternalServerError, domain.Map{"error": "An error occurred in the http server."})
+		if err != nil {
+			return handler.Error(err)
 		}
 
-		return c.JSON(http.StatusCreated, domain.Map{"message": "Product created."})
+		return c.JSON(http.StatusCreated, echo.Map{"message": "Product created."})
 	}
 }

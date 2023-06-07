@@ -3,6 +3,7 @@ package domain
 import (
 	"net/url"
 
+	"github.com/erik-sostenes/products-api/internal/shared/domain"
 	"github.com/erik-sostenes/products-api/internal/shared/domain/wrongs"
 )
 
@@ -27,6 +28,10 @@ type Product struct {
 // NewProduct returns a product instance, only if the values of the object are correct
 func NewProduct(id, title, imageUrl string, price, rating float64, offer, available bool, days int, amount float64) (Product, error) {
 	if err := URL(imageUrl).ensureUrlIsValid(); err != nil {
+		return Product{}, wrongs.StatusBadRequest(err.Error())
+	}
+
+	if err := domain.UuID(id).EnsureIdIsValid(); err != nil {
 		return Product{}, wrongs.StatusBadRequest(err.Error())
 	}
 

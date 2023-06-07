@@ -4,8 +4,7 @@ import (
 	"net/http"
 
 	"github.com/erik-sostenes/products-api/internal/core/products/business/services"
-	"github.com/erik-sostenes/products-api/internal/shared/domain"
-	"github.com/erik-sostenes/products-api/internal/shared/domain/wrongs"
+	"github.com/erik-sostenes/products-api/internal/shared/infrastructure/drives/handler"
 	"github.com/labstack/echo/v4"
 )
 
@@ -14,13 +13,14 @@ func FindProducts(services services.FinderProducts) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		products, err := services.ProductStorer.Find(c.Request().Context())
 
-		switch err.(type) {
-		case wrongs.StatusBadRequest:
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		default:
-			echo.NewHTTPError(http.StatusInternalServerError, domain.Map{"error": "An error occurred in the http server."})
+		if len(products) == 0 {
+			return c.JSON(http.StatusNoContent, echo.Map{"message": "No content of products."})
 		}
 
-		return c.JSON(http.StatusOK, domain.Map{"data": products})
+		if err != nil {
+			return handler.Error(err)
+		}
+
+		return c.JSON(http.StatusOK, echo.Map{"data": products})
 	}
 }
