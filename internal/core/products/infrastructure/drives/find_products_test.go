@@ -9,6 +9,7 @@ import (
 	"github.com/erik-sostenes/products-api/internal/core/products/business/domain"
 	"github.com/erik-sostenes/products-api/internal/core/products/business/services"
 	"github.com/erik-sostenes/products-api/internal/core/products/infrastructure/driven/db"
+	"github.com/erik-sostenes/products-api/internal/shared/domain/bus/query"
 	"github.com/labstack/echo/v4"
 )
 
@@ -41,22 +42,28 @@ func TestProductHandler_Find(t *testing.T) {
 					return nil, err
 				}
 
-				productsFinder := services.FinderProducts{
-					ProductStorer: mock,
+				finderProductsQueryHandler := services.NewFinderProductsQueryHandler(mock)
+
+				productsQueryBus := make(query.QueryBus[services.FindProductsQuery, []services.ProductResponse])
+				if err := productsQueryBus.Record(services.FindProductsQuery{}, finderProductsQueryHandler); err != nil {
+					return nil, err
 				}
 
-				return FindProducts(productsFinder), nil
+				return FindProducts(&productsQueryBus), nil
 			},
 			Request:            httptest.NewRequest(http.MethodGet, "/api/v1/products/get-all", http.NoBody),
 			expectedStatusCode: http.StatusOK,
 		},
 		"Given a valid http request, a status code 204 is expected": {
 			HandlerFunc: func() (echo.HandlerFunc, error) {
-				productsFinder := services.FinderProducts{
-					ProductStorer: db.NewMockProductStorer(),
+				finderProductsQueryHandler := services.NewFinderProductsQueryHandler(db.NewMockProductStorer())
+
+				productsQueryBus := make(query.QueryBus[services.FindProductsQuery, []services.ProductResponse])
+				if err := productsQueryBus.Record(services.FindProductsQuery{}, finderProductsQueryHandler); err != nil {
+					return nil, err
 				}
 
-				return FindProducts(productsFinder), nil
+				return FindProducts(&productsQueryBus), nil
 			},
 			Request:            httptest.NewRequest(http.MethodGet, "/api/v1/products/get-all", http.NoBody),
 			expectedStatusCode: http.StatusNoContent,

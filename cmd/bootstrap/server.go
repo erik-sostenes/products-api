@@ -8,6 +8,7 @@ import (
 	"github.com/erik-sostenes/products-api/internal/core/products/business/services"
 	"github.com/erik-sostenes/products-api/internal/core/products/infrastructure/drives"
 	"github.com/erik-sostenes/products-api/internal/shared/domain/bus/command"
+	"github.com/erik-sostenes/products-api/internal/shared/domain/bus/query"
 	"github.com/erik-sostenes/products-api/internal/shared/infrastructure/drives/status"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -20,16 +21,16 @@ type Server struct {
 	port   string
 	engine *echo.Echo
 	command.CommandBus[services.ProductCommand]
-	services.FinderProducts
-	services.FinderProduct
+	FinderProductsQueryBus query.QueryBus[services.FindProductsQuery, []services.ProductResponse]
+	FinderProductQueryBus  query.QueryBus[services.FindProductQuery, services.ProductResponse]
 }
 
 // NewServer returns an instance of Server
 func NewServer(
 	engine *echo.Echo,
 	cmdBus command.CommandBus[services.ProductCommand],
-	finderProducts services.FinderProducts,
-	finderProduct services.FinderProduct,
+	finderProductsQueryBus query.QueryBus[services.FindProductsQuery, []services.ProductResponse],
+	finderProductQueryBus query.QueryBus[services.FindProductQuery, services.ProductResponse],
 ) *Server {
 	port := os.Getenv("PORT")
 	if strings.TrimSpace(port) == "" {
@@ -37,11 +38,11 @@ func NewServer(
 	}
 
 	return &Server{
-		port:           port,
-		engine:         engine,
-		CommandBus:     cmdBus,
-		FinderProducts: finderProducts,
-		FinderProduct:  finderProduct,
+		port:                   port,
+		engine:                 engine,
+		CommandBus:             cmdBus,
+		FinderProductsQueryBus: finderProductsQueryBus,
+		FinderProductQueryBus:  finderProductQueryBus,
 	}
 }
 
@@ -61,6 +62,6 @@ func (s *Server) setRoutes() {
 
 	group.GET("/status", status.HealthCheck())
 	group.PUT("/create/:id", drives.CreateProduct(s.CommandBus))
-	group.GET("/get-all", drives.FindProducts(s.FinderProducts))
-	group.GET("/get/", drives.FindProduct(s.FinderProduct))
+	group.GET("/get-all", drives.FindProducts(&s.FinderProductsQueryBus))
+	group.GET("/get/", drives.FindProduct(&s.FinderProductQueryBus))
 }

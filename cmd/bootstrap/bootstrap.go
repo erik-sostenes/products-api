@@ -4,6 +4,7 @@ import (
 	"github.com/erik-sostenes/products-api/internal/core/products/business/services"
 	"github.com/erik-sostenes/products-api/internal/core/products/infrastructure/driven/db"
 	"github.com/erik-sostenes/products-api/internal/shared/domain/bus/command"
+	"github.com/erik-sostenes/products-api/internal/shared/domain/bus/query"
 	"github.com/labstack/echo/v4"
 )
 
@@ -19,13 +20,19 @@ func NewInjector() error {
 		return err
 	}
 
-	productsFinder := services.FinderProducts{
-		ProductStorer: mock,
+	finderProductsQueryHandler := services.NewFinderProductsQueryHandler(mock)
+
+	productsQueryBus := make(query.QueryBus[services.FindProductsQuery, []services.ProductResponse])
+	if err := productsQueryBus.Record(services.FindProductsQuery{}, finderProductsQueryHandler); err != nil {
+		return err
 	}
 
-	productFinder := services.FinderProduct{
-		ProductStorer: mock,
+	finderProductQueryHandler := services.NewFinderProductQueryHandler(mock)
+
+	productQueryBus := make(query.QueryBus[services.FindProductQuery, services.ProductResponse])
+	if err := productQueryBus.Record(services.FindProductQuery{}, finderProductQueryHandler); err != nil {
+		return err
 	}
 
-	return NewServer(engine, cmdBus, productsFinder, productFinder).Start()
+	return NewServer(engine, cmdBus, productsQueryBus, productQueryBus).Start()
 }

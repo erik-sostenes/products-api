@@ -9,6 +9,7 @@ import (
 	"github.com/erik-sostenes/products-api/internal/core/products/business/domain"
 	"github.com/erik-sostenes/products-api/internal/core/products/business/services"
 	"github.com/erik-sostenes/products-api/internal/core/products/infrastructure/driven/db"
+	"github.com/erik-sostenes/products-api/internal/shared/domain/bus/query"
 	"github.com/labstack/echo/v4"
 )
 
@@ -41,22 +42,28 @@ func TestProductHandler_FindById(t *testing.T) {
 					return nil, err
 				}
 
-				productFinder := services.FinderProduct{
-					ProductStorer: mock,
+				finderProductQueryHandler := services.NewFinderProductQueryHandler(mock)
+
+				queryBus := make(query.QueryBus[services.FindProductQuery, services.ProductResponse])
+				if err := queryBus.Record(services.FindProductQuery{}, finderProductQueryHandler); err != nil {
+					return nil, err
 				}
 
-				return FindProduct(productFinder), nil
+				return FindProduct(&queryBus), nil
 			},
 			Request:            httptest.NewRequest(http.MethodGet, "/api/v1/products/get/?id=4448b491-153b-4161-92a9-ecd12f541a28", http.NoBody),
 			expectedStatusCode: http.StatusOK,
 		},
 		"Given a valid http request, a status code 404 is expected": {
 			HandlerFunc: func() (echo.HandlerFunc, error) {
-				productFinder := services.FinderProduct{
-					ProductStorer: db.NewMockProductStorer(),
+				finderProductQueryHandler := services.NewFinderProductQueryHandler(db.NewMockProductStorer())
+
+				queryBus := make(query.QueryBus[services.FindProductQuery, services.ProductResponse])
+				if err := queryBus.Record(services.FindProductQuery{}, finderProductQueryHandler); err != nil {
+					return nil, err
 				}
 
-				return FindProduct(productFinder), nil
+				return FindProduct(&queryBus), nil
 			},
 			Request:            httptest.NewRequest(http.MethodGet, "/api/v1/products/get/?id=4448b491-153b-4161-92a9-ecd12f541a28", http.NoBody),
 			expectedStatusCode: http.StatusNotFound,
