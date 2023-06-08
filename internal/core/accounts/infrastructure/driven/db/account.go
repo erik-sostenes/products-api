@@ -18,12 +18,12 @@ func NewAccountStorer() ports.AccountStorer {
 	return &accountStorer{}
 }
 
-// Save method that persists in postgresql
+// Save method that persists in mysql
 func (a *accountStorer) Save(ctx context.Context, id domain.AccountId, account domain.Account) error {
 	return nil
 }
 
-// Find method that searches in postgresql for a user account by an identifier
+// Find method that searches in mysql for a user account by an identifier
 func (a *accountStorer) Find(ctx context.Context, accountId domain.AccountId) (account domain.Account, err error) {
 	return
 }
