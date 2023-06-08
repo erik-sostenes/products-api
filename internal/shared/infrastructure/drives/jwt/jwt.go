@@ -43,7 +43,7 @@ func NewClaims(account services.AccountResponse) Claims {
 		ID:   account.AccountId,
 		User: account.AccountUserName,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 15)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 15)),
 			Issuer:    "turing.ia",
 		},
 	}

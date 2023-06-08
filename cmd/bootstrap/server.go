@@ -11,6 +11,8 @@ import (
 	"github.com/erik-sostenes/products-api/internal/core/products/infrastructure/drives"
 	"github.com/erik-sostenes/products-api/internal/shared/domain/bus/command"
 	"github.com/erik-sostenes/products-api/internal/shared/domain/bus/query"
+	"github.com/erik-sostenes/products-api/internal/shared/infrastructure/drives/jwt"
+	middlewareJWT "github.com/erik-sostenes/products-api/internal/shared/infrastructure/drives/middleware"
 	"github.com/erik-sostenes/products-api/internal/shared/infrastructure/drives/status"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -27,6 +29,7 @@ type Server struct {
 	finderProductsQueryBus query.QueryBus[services.FindProductsQuery, []services.ProductResponse]
 	finderProductQueryBus  query.QueryBus[services.FindProductQuery, services.ProductResponse]
 	authQueryBus           query.QueryBus[servicesAuth.AuthenticateAccountQuery, servicesAuth.AuthResponse]
+	jwtClaims              jwt.Token[jwt.Claims]
 }
 
 // NewServer returns an instance of Server
@@ -37,6 +40,7 @@ func NewServer(
 	finderProductsQueryBus query.QueryBus[services.FindProductsQuery, []services.ProductResponse],
 	finderProductQueryBus query.QueryBus[services.FindProductQuery, services.ProductResponse],
 	authQueryBus query.QueryBus[servicesAuth.AuthenticateAccountQuery, servicesAuth.AuthResponse],
+	jwtClaims jwt.Token[jwt.Claims],
 ) *Server {
 	port := os.Getenv("PORT")
 	if strings.TrimSpace(port) == "" {
@@ -51,6 +55,7 @@ func NewServer(
 		finderProductsQueryBus: finderProductsQueryBus,
 		finderProductQueryBus:  finderProductQueryBus,
 		authQueryBus:           authQueryBus,
+		jwtClaims:              jwtClaims,
 	}
 }
 
@@ -68,12 +73,11 @@ func (s *Server) setRoutes() {
 	s.engine.Use(middleware.CORS(), middleware.Recover(), middleware.Logger())
 
 	s.engine.GET("/api/v1/authenticate/", drivesAuth.Authenticate(&s.authQueryBus))
+	s.engine.GET("/api/v1/status", status.HealthCheck())
 
 	group := s.engine.Group("/api/v1/products")
-
-	group.GET("/status", status.HealthCheck())
-	group.PUT("/create/:id", drives.CreateProduct(s.createProductCmdBus))
 	group.GET("/get-all", drives.FindProducts(&s.finderProductsQueryBus))
 	group.GET("/get/", drives.FindProduct(&s.finderProductQueryBus))
-	group.DELETE("/delete/:id", drives.DeleteProduct(s.deleteProductCmdBus))
+	group.PUT("/create/:id", middlewareJWT.Authorization(s.jwtClaims, drives.CreateProduct(s.createProductCmdBus)))
+	group.DELETE("/delete/:id", middlewareJWT.Authorization(s.jwtClaims, drives.DeleteProduct(s.deleteProductCmdBus)))
 }

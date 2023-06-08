@@ -3,7 +3,6 @@ package bootstrap
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/erik-sostenes/products-api/internal/core/accounts/business/domain"
 	servicesAccount "github.com/erik-sostenes/products-api/internal/core/accounts/business/services"
@@ -86,7 +85,7 @@ func NewInjector() error {
 	if err := authQueryBus.Record(servicesAuth.AuthenticateAccountQuery{}, &authenticateAccountQueryHandler); err != nil {
 		return err
 	}
-	fmt.Println(mockA)
+
 	mock := db.NewMockProductStorer()
 	productCommandHandler := services.NewCreateProductCommandHandler(mock)
 	createProductCmdBus := make(command.CommandBus[services.ProductCommand])
@@ -112,5 +111,6 @@ func NewInjector() error {
 		return err
 	}
 
-	return NewServer(engine, createProductCmdBus, deleteProductCmdBus, productsQueryBus, productQueryBus, authQueryBus).Start()
+	jwt := jwt.NewJWT([]byte(privateKey), []byte(publicKey))
+	return NewServer(engine, createProductCmdBus, deleteProductCmdBus, productsQueryBus, productQueryBus, authQueryBus, jwt).Start()
 }
