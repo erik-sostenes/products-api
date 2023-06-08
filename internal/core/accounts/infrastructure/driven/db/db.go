@@ -26,7 +26,7 @@ func NewMockAccountStorer() ports.AccountStorer {
 func (m mockAccountStorer) Save(_ context.Context, id domain.AccountId, account domain.Account) (err error) {
 	_, ok := m.cache[id]
 	if ok {
-		err = wrongs.StatusBadRequest(fmt.Sprintf("resource with id %v already existing", id))
+		err = wrongs.StatusBadRequest(fmt.Sprintf("Resource with id %v already existing.", id))
 		return
 	}
 
@@ -41,7 +41,7 @@ func (m mockAccountStorer) Remove(_ context.Context, id domain.AccountId) (err e
 	_, ok := m.cache[id]
 
 	if !ok {
-		err = wrongs.StatusNotFound(fmt.Sprintf("resource with id %v not found", id))
+		err = wrongs.StatusNotFound(fmt.Sprintf("Resource with id %v not found.", id))
 		return
 	}
 
@@ -56,7 +56,7 @@ func (m mockAccountStorer) Find(_ context.Context, id domain.AccountId) (account
 	account, ok := m.cache[id]
 
 	if !ok {
-		err = wrongs.StatusNotFound(fmt.Sprintf("resource with id %v not found", id))
+		err = wrongs.StatusNotFound(fmt.Sprintf("Resource with id %v not found.", id))
 		return
 	}
 

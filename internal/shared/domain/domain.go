@@ -17,7 +17,7 @@ type UuID string
 func (i UuID) EnsureIdIsValid() error {
 	_, err := uuid.Parse(string(i))
 	if err != nil {
-		return wrongs.StatusNotFound(fmt.Sprintf("resource with id %v not found", string(i)))
+		return wrongs.StatusBadRequest(fmt.Sprintf("The identifier is not a uuid: %s.", string(i)))
 	}
 	return nil
 }

@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 
+	servicesAuth "github.com/erik-sostenes/products-api/internal/core/auth/business/services"
+	drivesAuth "github.com/erik-sostenes/products-api/internal/core/auth/infrastructure/drives"
 	"github.com/erik-sostenes/products-api/internal/core/products/business/services"
 	"github.com/erik-sostenes/products-api/internal/core/products/infrastructure/drives"
 	"github.com/erik-sostenes/products-api/internal/shared/domain/bus/command"
@@ -24,6 +26,7 @@ type Server struct {
 	deleteProductCmdBus    command.CommandBus[services.DeleteProductCommand]
 	finderProductsQueryBus query.QueryBus[services.FindProductsQuery, []services.ProductResponse]
 	finderProductQueryBus  query.QueryBus[services.FindProductQuery, services.ProductResponse]
+	authQueryBus           query.QueryBus[servicesAuth.AuthenticateAccountQuery, servicesAuth.AuthResponse]
 }
 
 // NewServer returns an instance of Server
@@ -33,6 +36,7 @@ func NewServer(
 	deleteProductCmdBus command.CommandBus[services.DeleteProductCommand],
 	finderProductsQueryBus query.QueryBus[services.FindProductsQuery, []services.ProductResponse],
 	finderProductQueryBus query.QueryBus[services.FindProductQuery, services.ProductResponse],
+	authQueryBus query.QueryBus[servicesAuth.AuthenticateAccountQuery, servicesAuth.AuthResponse],
 ) *Server {
 	port := os.Getenv("PORT")
 	if strings.TrimSpace(port) == "" {
@@ -46,6 +50,7 @@ func NewServer(
 		deleteProductCmdBus:    deleteProductCmdBus,
 		finderProductsQueryBus: finderProductsQueryBus,
 		finderProductQueryBus:  finderProductQueryBus,
+		authQueryBus:           authQueryBus,
 	}
 }
 
@@ -61,6 +66,9 @@ func (s *Server) Start() error {
 // configure the middlewares CORS, Logger and Recover
 func (s *Server) setRoutes() {
 	s.engine.Use(middleware.CORS(), middleware.Recover(), middleware.Logger())
+
+	s.engine.GET("/api/v1/authenticate/", drivesAuth.Authenticate(&s.authQueryBus))
+
 	group := s.engine.Group("/api/v1/products")
 
 	group.GET("/status", status.HealthCheck())

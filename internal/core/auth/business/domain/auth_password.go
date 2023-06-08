@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"github.com/erik-sostenes/products-api/internal/shared/domain"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -12,11 +11,6 @@ type AuthPassword struct {
 
 // NewAuthPassword returns an instance of AuthPassword
 func NewAuthPassword(value string) (AuthPassword, error) {
-	err := domain.UuID(value).EnsureIdIsValid()
-	if err != nil {
-		return AuthPassword{}, err
-	}
-
 	return AuthPassword{
 		value,
 	}, nil

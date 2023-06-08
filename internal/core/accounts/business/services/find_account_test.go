@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/erik-sostenes/products-api/internal/core/accounts/business/domain"
-	"github.com/erik-sostenes/products-api/internal/core/accounts/infrastructure/db"
+	"github.com/erik-sostenes/products-api/internal/core/accounts/infrastructure/driven/db"
 	"github.com/erik-sostenes/products-api/internal/shared/domain/bus/query"
 	"github.com/erik-sostenes/products-api/internal/shared/domain/wrongs"
 )
@@ -36,7 +36,7 @@ func TestAccountHandler_Find(t *testing.T) {
 
 				return bus, nil
 			},
-			expectedError: wrongs.StatusNotFound(fmt.Sprintf("resource with id %v not found", id)),
+			expectedError: wrongs.StatusNotFound(fmt.Sprintf("Resource with id %v not found.", id)),
 		},
 		"Given a valid account that exists, no errors are expected.": {
 			id: "2bdcc2f9-9522-4daa-94db-3d0f8b1cacb8",
