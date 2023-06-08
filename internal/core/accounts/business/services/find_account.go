@@ -32,12 +32,12 @@ type FindAccountQueryHandler struct {
 // Handler instantiates a domain.AccountId (Domain Object) with the query primitive value
 func (h *FindAccountQueryHandler) Handler(ctx context.Context, qry FindAccountQuery) (AccountResponse, error) {
 	id, err := domain.NewAccountId(qry.AccountId)
-
 	if err != nil {
 		return AccountResponse{}, err
 	}
 
-	account, err := h.Find(ctx, id)
+	account, err := h.AccountStorer.Find(ctx, id)
+
 	if err != nil {
 		return AccountResponse{}, err
 	}
